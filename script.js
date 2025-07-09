@@ -5,11 +5,10 @@ const temperatureSlider = document.getElementById('temperature');
 const numMolecules = 100;
 const molecules = [];
 let baseSpeed = 2;
-let balloonSize = 200; // Initial size
+let balloonSize; // Initial size will be set dynamically
 
 function initializeSimulation() {
-    balloon.style.width = `${balloonSize}px`;
-    balloon.style.height = `${balloonSize}px`;
+    updateBalloonSize();
 
     for (let i = 0; i < numMolecules; i++) {
         const moleculeElement = document.createElement('div');
@@ -35,12 +34,18 @@ function initializeSimulation() {
 
 function updateTemperature() {
     const temperatureValue = temperatureSlider.value;
-    baseSpeed = temperatureValue / 25; 
-    
-    // V ∝ T (Charles's Law) -> r^3 ∝ T -> r ∝ T^(1/3)
-    // For simplicity, we'll make the size change more visually apparent.
-    const newSize = 180 + temperatureValue * 2;
-    balloonSize = newSize;
+    baseSpeed = temperatureValue / 25;
+    updateBalloonSize();
+}
+
+function updateBalloonSize() {
+    const containerSize = document.querySelector('.simulation-container').offsetWidth;
+    const temperatureValue = temperatureSlider.value;
+    // Adjust balloon size based on both container and temperature
+    const baseBalloonSize = containerSize * 0.5; // Base size relative to container
+    const tempEffect = (temperatureValue / 100) * (containerSize * 0.4);
+    balloonSize = baseBalloonSize + tempEffect;
+
     balloon.style.width = `${balloonSize}px`;
     balloon.style.height = `${balloonSize}px`;
 }
@@ -75,5 +80,11 @@ function animate() {
 }
 
 temperatureSlider.addEventListener('input', updateTemperature);
+window.addEventListener('resize', () => {
+    // Re-initialize to adjust to new screen size
+    moleculesContainer.innerHTML = '';
+    molecules.length = 0;
+    initializeSimulation();
+});
 
 initializeSimulation();
